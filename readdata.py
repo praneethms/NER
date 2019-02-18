@@ -21,13 +21,15 @@ def _read_data(input_file):
 	        words.append('')
 	        continue
             if word == '.':
-                lst.append((word, label))
+	        post = line.strip().split(' ')[1]
+                lst.append((word, post, label))
 	        lines.append(lst)
 		words = []
 		lst = []
 		continue
 	    if len(word) > 0:
-		tp = (word, label)
+	        post = line.strip().split(' ')[1]
+		tp = (word, post, label)
 		lst.append(tp)
     return lines
 
@@ -38,4 +40,9 @@ if __name__ == "__main__":
     contents = _read_data(filename)
 	
     joblib.dump(contents, "data/bert-train.pkl")
-    print("Conversion done..") 
+    print("Train Conversion done..")
+
+    filename = os.path.join("data","test.txt")
+    contents = _read_data(filename)
+    joblib.dump(contents, "data/bert-test.pkl")
+    print("Test Conversion done...") 
