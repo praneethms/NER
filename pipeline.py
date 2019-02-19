@@ -1,41 +1,29 @@
 # -*- coding:utf-8 -*-
 import pycrfsuite
+from sklearn.preprocessing import LabelBinarizer
+from itertools import chain
+from sklearn.metrics import classification_report
+
 
 import joblib
 import os
+import sys
+
+
 
 from features import *
-
-
-def traincrf(trainfile, testfile):
-    traindata = joblib.load(trainfile)
-    testdata = joblib.load(testfile)
-    
-    X_train = [sent2features(s) for s in traindata]
-    y_train = [sent2labels(s) for s in traindata]
-
-    X_test = [sent2features(s) for s in testdata]
-    y_test = [sent2labels(s) for s in testdata]
-    	
-    build_model(X_train, y_train)
-
-
-def build_model(X_train, y_train):
-    trainer = pycrfsuite.Trainer(verbose=True)
-    for X,y in zip(X_train, y_train):
-	trainer.append(X,y)
-   
-    trainer.set_params({
-	'max_iterations':100,
-	'feature.possible_transitions': True
-    })
-    print("Training.....")
-    trainer.train(os.path.join("models","bert-eng.crfsuite"))
-    print("Training complete")
+import modeling as modeler
 
 if __name__ == "__main__":
-    traindata = joblib.load(os.path.join("data", "bert-train.pkl"))
-    print(len(traindata))
-    traincrf( os.path.join("data","bert-train.pkl"), 
+    if len(sys.argv) > 1  and sys.argv[1] == 'train': 
+        traindata = joblib.load(os.path.join("data", "bert-train.pkl"))
+        print(len(traindata))
+        modeler.traincrf( os.path.join("data","bert-train.pkl"), 
 	      os.path.join("data","bert-test.pkl")) 
-   
+    else:
+        testdata = joblib.load(os.path.join("data","bert-test.pkl"))
+        print(len(testdata))
+        y_test, y_pred, y_prob = modeler.predict(os.path.join("data","bert-test.pkl"))
+
+        rep = modeler.report(y_test, y_pred) 
+	print rep
